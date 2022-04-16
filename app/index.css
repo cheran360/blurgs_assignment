@@ -20,6 +20,7 @@ html, body {
 .subright-two{
     overflow-y: scroll;
     height: 300px;
+    padding: 10px;
 
 }
 table {
