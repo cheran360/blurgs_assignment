@@ -49,13 +49,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
     <script>
       let masterTable = document.getElementById("master-table");
+      const path = require("path");
 
       function clickfunc(reference) {
         getSubTable(reference);
       }
 
       async function getData() {
-        const response = await fetch("../assets/assets/master.csv");
+        const url = path.join(__dirname, "../assets/assets/master.csv");
+        const response = await fetch(url);
         const rawData = await response.text();
         let arrayOne = rawData.split("\r\n");
         let rowsArray = [];
@@ -118,8 +120,8 @@
         let latitudeArray = [];
         let longitudeArray = [];
         subTable.innerHTML = "";
-
-        const response = await fetch(`../assets/assets/${Id}.csv`);
+        let suburl = path.join(__dirname, `../assets/assets/${Id}.csv`);
+        const response = await fetch(suburl);
         const rawData = await response.text();
         let subTableArray = rawData.split("\r\n");
         let subTableRowsArray = [];
