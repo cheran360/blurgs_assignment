@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./index.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+
+    <title>csv reader</title>
+  </head>
+  <body>
+    <div class="row">
+      <div class="col-md-6 left-box">
+        <h3>Master.csv Files</h3>
+        <div class="card card-body">
+          <table class="table table-sm" id="master-table">
+            <tr>
+              <th>A</th>
+              <th>B</th>
+              <th>View refs</th>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="col-md-6 right-box">
+        <div class="subright-one" id="subright-one">
+          <canvas id="myChart1"></canvas>
+        </div>
+        <h3>csv files</h3>
+        <div class="subright-two">
+          <div class="card card-content">
+            <table class="table table-sm" id="sub-table">
+              <tr>
+                <th>A</th>
+                <th>latitude</th>
+                <th>longitude</th>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+    <script>
+      let masterTable = document.getElementById("master-table");
+
+      function clickfunc(reference) {
+        getSubTable(reference);
+      }
+
+      async function getData() {
+        const response = await fetch("../assets/assets/master.csv");
+        const rawData = await response.text();
+        let arrayOne = rawData.split("\r\n");
+        let rowsArray = [];
+        let refKey;
+        let timeStamp;
+
+        for (let i = 0; i < arrayOne.length - 1; i++) {
+          rowsArray = arrayOne[i].split(", ");
+          refKey = rowsArray[0];
+          timeStamp = rowsArray[1];
+          let row_1 = document.createElement("tr");
+          let data_1 = document.createElement("td");
+          data_1.innerHTML = refKey;
+          let data_2 = document.createElement("td");
+          data_2.innerHTML = timeStamp;
+
+          let data_3 = document.createElement("td");
+          data_3.innerHTML =
+            '<button type="button" onclick="clickfunc(\'' +
+            refKey +
+            '\')" class="btn btn-warning btn-sm">View</button>';
+
+          row_1.appendChild(data_1);
+          row_1.appendChild(data_2);
+          row_1.appendChild(data_3);
+          masterTable.appendChild(row_1);
+        }
+      }
+
+      // get graph of coordinates
+      function getGraph(latitudeArray, longitudeArray) {
+        let dataArray = [];
+        document.getElementById("subright-one").innerHTML = "&nbsp;";
+        document.getElementById("subright-one").innerHTML =
+          '<canvas id="myChart1"></canvas>';
+        for (let i = 0; i < latitudeArray.length; i++) {
+          dataArray.push({ x: latitudeArray[i], y: longitudeArray[i] });
+        }
+        var x = new Chart(document.getElementById("myChart1"), {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "plot",
+                data: dataArray,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+          },
+        });
+      }
+
+      let subTable = document.getElementById("sub-table");
+      async function getSubTable(Id) {
+        let A;
+        let latitude;
+        let longitude;
+        let latitudeArray = [];
+        let longitudeArray = [];
+        subTable.innerHTML = "";
+
+        const response = await fetch(`../assets/assets/${Id}.csv`);
+        const rawData = await response.text();
+        let subTableArray = rawData.split("\r\n");
+        let subTableRowsArray = [];
+
+        let headrow = document.createElement("tr");
+        let heading_1 = document.createElement("th");
+        heading_1.innerHTML = "A";
+        let heading_2 = document.createElement("th");
+        heading_2.innerHTML = "latitude";
+        let heading_3 = document.createElement("th");
+        heading_3.innerHTML = "longitude";
+
+        headrow.appendChild(heading_1);
+        headrow.appendChild(heading_2);
+        headrow.appendChild(heading_3);
+        subTable.appendChild(headrow);
+
+        for (let j = 0; j < subTableArray.length - 1; j++) {
+          subTableRowsArray = subTableArray[j].split(",");
+          A = subTableRowsArray[0];
+          latitude = subTableRowsArray[1];
+          longitude = subTableRowsArray[2];
+
+          longitudeArray.push(longitude);
+          latitudeArray.push(latitude);
+
+          let subRow = document.createElement("tr");
+          let subData_1 = document.createElement("td");
+          subData_1.innerHTML = A;
+
+          let subData_2 = document.createElement("td");
+          subData_2.innerHTML = latitude;
+
+          let subData_3 = document.createElement("td");
+          subData_3.innerHTML = longitude;
+
+          subRow.appendChild(subData_1);
+          subRow.appendChild(subData_2);
+          subRow.appendChild(subData_3);
+          subTable.appendChild(subRow);
+        }
+        getGraph(latitudeArray, longitudeArray);
+      }
+
+      getData();
+    </script>
+  </body>
+</html>
